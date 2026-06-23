@@ -1,0 +1,3 @@
+kubectl port-forward svc/atlantis -n atlantis 4141:80
+ngrok http 4141
+
