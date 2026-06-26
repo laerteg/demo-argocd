@@ -1,8 +1,8 @@
 name: Deploy to ArgoCD
 on:
   push:
-    branches:
-      - main
+    paths:
+      - 'manifests/**'
 jobs:
   deploy:
     runs-on: ubuntu-latest

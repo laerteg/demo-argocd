@@ -1,0 +1,21 @@
+name: Atlantis Trigger
+
+on:
+  pull_request:
+    paths:
+      - 'terraform/**'
+
+jobs:
+  trigger-atlantis:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Trigger Atlantis Plan
+        run: |
+          curl -X POST \
+            -H "Content-Type: application/json" \
+            -H "X-Hub-Signature: ${{ secrets.ATLANTIS_WEBHOOK_SECRET }}" \
+            -d '{"event":"pull_request","action":"opened"}' \
+            ${{ secrets.ATLANTIS_URL }}/events
