@@ -1,0 +1,60 @@
+# main.tf
+
+module "eks" {
+  source  = "terraform-aws-modules/eks/aws"
+  version = "~> 21.0"
+
+  cluster_name    = "meu-cluster-existente"
+  cluster_version = "1.31"
+
+  # 1. Configuração de Rede Básica
+  vpc_id     = "vpc-XXXXXXXXXXXXX" # Insira o ID da sua VPC existente
+  subnet_ids = [
+    "subnet-publica-1",          # Insira suas subnets públicas aqui
+    "subnet-publica-2"
+  ]
+
+  # Como você tem subnets públicas e privadas, o endpoint pode ser exposto de forma híbrida
+  cluster_endpoint_public_access  = true
+  cluster_endpoint_private_access = true
+
+  # 2. Vinculando seus Security Groups Existentes
+  create_cluster_security_group = false # Impede o módulo de criar um novo SG para o cluster
+  cluster_security_group_id     = "sg-cluster-existente-XXXXX" # Seu SG do Cluster
+
+  create_node_security_group    = false # Impede o módulo de criar um novo SG para os nós
+  node_security_group_id        = "sg-nodes-existente-XXXXX"   # Seu SG dos Workers
+
+  # 3. Definição do Grupo de Nós nas Subnets Privadas
+  eks_managed_node_groups = {
+    workers_privados = {
+      min_size     = 1
+      max_size     = 3
+      desired_size = 2
+
+      # É uma boa prática de segurança rodar as instâncias nas subnets privadas
+      subnet_ids = [
+        "subnet-privada-1",      # Insira suas subnets privadas aqui
+        "subnet-privada-2"
+      ]
+
+      instance_types = ["t3.medium"]
+      
+      # Garante que as instâncias herdem o SG correto dos nós
+      attach_cluster_primary_security_group = false
+    }
+  }
+
+  tags = {
+    Environment = "prod"
+    ManagedBy   = "Terraform"
+  }
+}
+
+###
+Para que o EKS se comunique corretamente com a sua rede e consiga provisionar Load Balancers automaticamente, certifique-se de que suas subnets existentes possuam as seguintes Tags na AWS:
+
+Nas Subnets Públicas:  kubernetes.io/role/elb = 1
+Nas Subnets Privadas:  kubernetes.io/role/internal-elb = 1
+Em todas as Subnets (Públicas e Privadas):  kubernetes.io/cluster/meu-cluster-existente = shared ou owned
+
