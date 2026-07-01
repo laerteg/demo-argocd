@@ -2,14 +2,16 @@
 
 module "eks" {
   source  = "terraform-aws-modules/eks/aws"
-  version = "~> 21.0"
+  version = "~> 20.0"
 
   cluster_name    = var.name-cluster
-  cluster_version = var.cluster-version
+  cluster_version = var.version-cluster
 
   # 1. Configuração de Rede Básica
-  vpc_id     = var.vpc-id # Insira o ID da sua VPC existente
-  subnet_ids = var.subnet-pub
+  vpc_id     = var.vpc-id
+ 
+  subnet_ids = var.subnet-priv
+ 
 
   # Endpoint subnets públicas e privadas
   cluster_endpoint_public_access  = true
@@ -17,14 +19,16 @@ module "eks" {
 
   # Security Groups
   create_cluster_security_group = false
-  cluster_security_group_id     = var.sg-clsuter
+  cluster_security_group_id     = var.sg-cluster
 
   create_node_security_group    = false
-  node_security_group_id        = sg-node
+  node_security_group_id        = var.sg-node
 
   # Grupo de Nós
   eks_managed_node_groups = {
-    workers_privados = {
+    general_purpose = {
+      name         = "node-group-demo-apps"
+      cluster_name = var.name-cluster
       min_size     = var.ng-min
       max_size     = var.ng-max
       desired_size = var.ng-desired
@@ -32,10 +36,11 @@ module "eks" {
       # rodar as instâncias nas subnets privadas
       subnet_ids = var.subnet-priv
 
-      instance_types = var.node-types
+      instance_types = var.node-type
       
       # Garante que as instâncias herdem o SG correto dos nós
       attach_cluster_primary_security_group = false
+      vpc_security_group_ids     = [var.sg-cluster]
     }
   }
 

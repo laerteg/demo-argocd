@@ -8,13 +8,13 @@ variable "region" {
 variable "name-cluster" {
   description = "Nome EKS cluster"
   type        = string
-  default     = ""
+  default     = "demo-cluster-eks"
 }
 
 variable "version-cluster" {
   description = "Nome EKS cluster"
   type        = string
-  default     = "1.31"
+  default     = "1.33"
 }
 
 variable "vpc-id" {
@@ -25,13 +25,13 @@ variable "vpc-id" {
 
 variable "subnet-pub" {
   description = "Subnets publicas EKS cluster"
-  type        = string
+  type        = list(string)
   default     = ["subnet-094f6170166da27fb", "subnet-0c8e53aad5c7b625d"]
 }
 
 variable "subnet-priv" {
   description = "Subnets privadas EKS cluster"
-  type        = string
+  type        = list(string)
   default     = ["subnet-08d54292acc4ec4b0", "subnet-0ac57f9475edcd3fe"]
 }
 
@@ -49,25 +49,25 @@ variable "sg-node" {
 
 variable "ng-min" {
   description = "min nodes EKS cluster"
-  type        = integer
+  type        = number
   default     = 1
 }
 
 variable "ng-max" {
   description = "max nodes EKS cluster"
-  type        = integer
+  type        = number
   default     = 2
 }
 
 variable "ng-desired" {
   description = "desired nodes EKS cluster"
-  type        = integer
+  type        = number
   default     = 2
 }
 
 variable "node-type" {
   description = "Instance Type EKS cluster"
-  type        = string
+  type        = list(string)
   default     = ["t2.medium"]
 }
 
